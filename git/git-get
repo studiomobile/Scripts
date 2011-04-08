@@ -1,0 +1,31 @@
+#!/bin/bash
+
+export branch=`git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/'`
+
+if [ $branch != "master" ]; then
+    echo && \
+    echo -e '\e[0;36m1. Switching to master branch' && \
+    echo -e '============================\e[m' && \
+    git checkout master && \
+    \
+    echo && \
+    echo -e '\e[0;36m2. Pulling latest changes from master origin' && \
+    echo -e '============================\e[m' && \
+    git pull && \
+    \
+    echo && \
+    echo -e '\e[0;36m3. Getting back to private branch' && \
+    echo -e '============================\e[m' && \
+    git checkout $branch && \
+    \
+    echo && \
+    echo -e '\e[0;36m4. Rebasing your branch on master' && \
+    echo -e '============================\e[m' && \
+    git rebase master && \
+    echo
+else
+    echo -e '\e[1;31mYou should *NEVER* git-get from \e[1;32mmaster\e[1;31m branch!\e[m'
+    echo -e ''
+    echo -e '\e[1;31mConsult your PM if you have problems with it.\e[m'
+fi
+

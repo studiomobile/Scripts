@@ -1,0 +1,57 @@
+#!/bin/bash
+
+export branch=`git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/'`
+
+if [ $branch != "master" ]; then
+    echo && \
+    echo -e '\e[0;36m1. Switching to master branch' && \
+    echo -e '============================\e[m' && \
+    git checkout master && \
+    \
+    echo && \
+    echo -e '\e[0;36m2. Pulling latest changes from master origin' && \
+    echo -e '============================\e[m' && \
+    git pull && \
+    \
+    echo && \
+    echo -e '\e[0;36m3. Getting back to private branch' && \
+    echo -e '============================\e[m' && \
+    git checkout $branch && \
+    \
+    echo && \
+    echo -e '\e[0;36m4. Rebasing your branch on master' && \
+    echo -e '============================\e[m' && \
+    git rebase master && \
+    \
+    echo && \
+    echo -e '\e[0;36m5. Returning to master branch' && \
+    echo -e '============================\e[m' && \
+    git checkout master && \
+    \
+    echo && \
+    echo -e '\e[0;36m6. Merging your changes with master' && \
+    echo -e '============================\e[m' && \
+    git merge $branch && \
+    echo && \
+    echo -e '\e[0;36m7. Pushing your changes from master to origin' && \
+    echo -e '============================\e[m' && \
+    git push && \
+    \
+    echo && \
+    echo -e '\e[0;36m8. Getting back to private branch' && \
+    echo -e '============================\e[m' && \
+    git checkout $branch && \
+    echo
+else
+    echo -e '\e[1;31mYou should *NEVER* push from \e[1;32mmaster\e[1;31m branch!\e[m'
+    echo -e ''
+    echo -e 'For resolve problem do the following steps:'
+    echo -e '  1. Move all you commits from \e[1;32mmaster\e[m to your development branch.'
+    echo -e '     \e[0;33mUse git-cherry-pick command for it.\e[m'
+    echo -e '  2. Remove all you commits from \e[1;32mmaster\e[m.'
+    echo -e '\e[0;33m     Use git-reset command for it.\e[m'
+    echo -e '  3. Select development branch and make push again.'
+    echo -e ''
+    echo -e '\e[1;31mConsult your PM if you have problems with it.\e[m'
+fi
+
