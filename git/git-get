@@ -2,30 +2,35 @@
 
 export branch=`git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/'`
 
-if [ $branch != "master" ]; then
-    echo && \
-    echo -e '\033[0;36m1. Switching to master branch' && \
-    echo -e '============================\033[m' && \
-    git checkout master && \
-    \
-    echo && \
-    echo -e '\033[0;36m2. Pulling latest changes from master origin' && \
-    echo -e '============================\033[m' && \
-    git pull && \
-    \
-    echo && \
-    echo -e '\033[0;36m3. Getting back to private branch' && \
-    echo -e '============================\033[m' && \
-    git checkout $branch && \
-    \
-    echo && \
-    echo -e '\033[0;36m4. Rebasing your branch on master' && \
-    echo -e '============================\033[m' && \
-    git rebase master && \
-    echo
-else
-    echo -e '\033[1;31mYou should *NEVER* git-get from \033[1;32mmaster\033[1;31m branch!\033[m'
-    echo -e ''
-    echo -e '\033[1;31mConsult your PM if you have problems with it.\033[m'
-fi
-
+case "$branch" in
+    "master")
+        echo -e '\033[1;31mYou should *NEVER* git-get from \033[1;32mmaster\033[1;31m branch!\033[m'
+        echo -e ''
+        echo -e '\033[1;31mConsult your PM if you have problems with it.\033[m'
+        ;;
+    "")
+        echo -e '\033[1;31mMove to git repository before git-get\033[m'
+        ;;
+    *)
+        echo && \
+        echo -e '\033[0;36m1. Switching to master branch' && \
+        echo -e '============================\033[m' && \
+        git checkout master && \
+        \
+        echo && \
+        echo -e '\033[0;36m2. Pulling latest changes from master origin' && \
+        echo -e '============================\033[m' && \
+        git pull && \
+        \
+        echo && \
+        echo -e '\033[0;36m3. Getting back to private branch' && \
+        echo -e '============================\033[m' && \
+        git checkout $branch && \
+        \
+        echo && \
+        echo -e '\033[0;36m4. Rebasing your branch on master' && \
+        echo -e '============================\033[m' && \
+        git rebase master && \
+        echo
+        ;;
+esac
