@@ -20,41 +20,41 @@ case "$branch" in
         ;;
     *)
         echo && \
-        echo -e '\033[0;36m1. Switching to master branch' && \
+        echo -e '\033[0;36mSwitching to master branch' && \
         echo -e '============================\033[m' && \
         git checkout master && \
         \
         echo && \
-        echo -e '\033[0;36m2. Pulling latest changes from master origin' && \
+        echo -e '\033[0;36mPulling latest changes from master origin' && \
         echo -e '============================\033[m' && \
         git pull && \
         \
         echo && \
-        echo -e '\033[0;36m3. Getting back to private branch' && \
+        echo -e '\033[0;36mGetting back to private branch' && \
         echo -e '============================\033[m' && \
         git checkout $branch && \
         \
         echo && \
-        echo -e '\033[0;36m4. Rebasing your branch on master' && \
+        echo -e '\033[0;36mRebasing your branch on master' && \
         echo -e '============================\033[m' && \
         git rebase master && \
         \
         echo && \
-        echo -e '\033[0;36m5. Returning to master branch' && \
+        echo -e '\033[0;36mReturning to master branch' && \
         echo -e '============================\033[m' && \
         git checkout master && \
         \
         echo && \
-        echo -e '\033[0;36m6. Merging your changes with master' && \
+        echo -e '\033[0;36mMerging your changes with master' && \
         echo -e '============================\033[m' && \
         git merge $branch && \
         echo && \
-        echo -e '\033[0;36m7. Pushing your changes from master to origin' && \
+        echo -e '\033[0;36mPushing your changes from master to origin' && \
         echo -e '============================\033[m' && \
         git push && \
         \
         echo && \
-        echo -e '\033[0;36m8. Getting back to private branch' && \
+        echo -e '\033[0;36mGetting back to private branch' && \
         echo -e '============================\033[m' && \
         git checkout $branch && \
         echo

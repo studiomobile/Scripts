@@ -1,0 +1,8 @@
+#!/bin/bash
+
+export user=`whoami`
+
+echo && \
+echo -e '\033[0;36mCreate branch: ' $user && \
+echo -e '============================\033[m' && \
+git checkout -b $user

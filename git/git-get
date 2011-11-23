@@ -1,36 +1,63 @@
 #!/bin/bash
 
-export branch=`git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/'`
+get_repository()
+{
+    echo && \
+    echo -e '\033[0;36mClone repository: ' $1 && \
+    echo -e '============================\033[m' && \
+    git clone git@github.com:studiomobile/$1.git && \
+    \
+    cd $1 > /dev/null && \
+    echo && \
+    echo -e '\033[0;36mInit and update submodules' && \
+    echo -e '============================\033[m' && \
+    git submodule init && \
+    git submodule update && \
+    \
+    mybranch && \
+    cd - > /dev/null
+}
 
-case "$branch" in
-    "master")
-        echo -e '\033[1;31mYou should *NEVER* git-get from \033[1;32mmaster\033[1;31m branch!\033[m'
-        echo -e ''
-        echo -e '\033[1;31mConsult your PM if you have problems with it.\033[m'
-        ;;
-    "")
-        echo -e '\033[1;31mMove to git repository before git-get\033[m'
-        ;;
-    *)
-        echo && \
-        echo -e '\033[0;36m1. Switching to master branch' && \
-        echo -e '============================\033[m' && \
-        git checkout master && \
-        \
-        echo && \
-        echo -e '\033[0;36m2. Pulling latest changes from master origin' && \
-        echo -e '============================\033[m' && \
-        git pull && \
-        \
-        echo && \
-        echo -e '\033[0;36m3. Getting back to private branch' && \
-        echo -e '============================\033[m' && \
-        git checkout $branch && \
-        \
-        echo && \
-        echo -e '\033[0;36m4. Rebasing your branch on master' && \
-        echo -e '============================\033[m' && \
-        git rebase master && \
-        echo
-        ;;
-esac
+get_changes() 
+{
+    export branch=`git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/'`
+
+    case "$branch" in
+        "master")
+            echo -e '\033[1;31mYou should *NEVER* git-get from \033[1;32mmaster\033[1;31m branch!\033[m'
+            echo -e ''
+            echo -e '\033[1;31mConsult your PM if you have problems with it.\033[m'
+            ;;
+        "")
+            echo -e '\033[1;31mMove to git repository before git-get or use name of repository to clone it.\033[m'
+            ;;
+        *)
+            echo && \
+            echo -e '\033[0;36mSwitching to master branch' && \
+            echo -e '============================\033[m' && \
+            git checkout master && \
+            \
+            echo && \
+            echo -e '\033[0;36mPulling latest changes from master origin' && \
+            echo -e '============================\033[m' && \
+            git pull && \
+            \
+            echo && \
+            echo -e '\033[0;36mGetting back to private branch' && \
+            echo -e '============================\033[m' && \
+            git checkout $branch && \
+            \
+            echo && \
+            echo -e '\033[0;36mRebasing your branch on master' && \
+            echo -e '============================\033[m' && \
+            git rebase master && \
+            echo
+            ;;
+    esac        
+}
+
+if [ "$#" -eq 1 ] ; then
+    get_repository $1
+else
+    get_changes
+fi
