@@ -30,6 +30,11 @@ case "$branch" in
         git pull && \
         \
         echo && \
+        echo -e '\033[0;36mUpdate submodules' && \
+        echo -e '============================\033[m' && \
+        git submodule update && \
+        \
+        echo && \
         echo -e '\033[0;36mGetting back to private branch' && \
         echo -e '============================\033[m' && \
         git checkout $branch && \
