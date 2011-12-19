@@ -1,67 +1,62 @@
 #!/bin/bash
 
-export branch=`git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/'`
+HL='\033[0;36m'
+WARN='\033[1;31m'
+TIP='\033[0;33m'
+NOHL='\033[m'
+
+p() { if [ -z $2 ] ; then echo -e $1 ; else echo -e ${2}${1}${NOHL} ; fi }
+
+step() {
+  sub=`echo $1 | sed -e 's/./=/g'`
+  p "\n$1\n$sub" $HL
+}
+
+branch=`git-current-branch`
 
 case "$branch" in
     "master")
-        echo -e '\033[1;31mYou should *NEVER* push from \033[1;32mmaster\033[1;31m branch!\033[m'
-        echo -e ''
-        echo -e 'To resolve problem do the following steps:'
-        echo -e '  1. Move all you commits from \033[1;32mmaster\033[m to your development branch.'
-        echo -e '     \033[0;33mUse git-cherry-pick command.\033[m'
-        echo -e '  2. Remove all you commits from \033[1;32mmaster\033[m.'
-        echo -e '\033[0;33m     Use git-reset command.\033[m'
-        echo -e '  3. Select development branch and make push again.'
-        echo -e ''
-        echo -e '\033[1;31mConsult your PM if you have problems with it.\033[m'
+        echo -e "You should ${WARN}*NEVER* push from master${NOHL} branch!"
+        echo
+        echo -e "To resolve problem do the following steps:"
+        echo -e "  1. Move all you commits from master to your development branch."
+        echo -e "     Use ${TIP}git-cherry-pick${NOHL} command."
+        echo -e "  2. Remove all you commits from master."
+        echo -e "     Use ${TIP}git-reset${NOHL} command."
+        echo -e "  3. Select development branch and make push again."
+        echo
+        p "Consult your PM if you have problems with it." $WARN
         ;;
     "")
-        echo -e '\033[1;31mMove to git repository before push\033[m'
+        p "Move to git repository before push" $WARN
         ;;
     *)
-        echo && \
-        echo -e '\033[0;36mSwitching to master branch' && \
-        echo -e '============================\033[m' && \
-        git checkout master && \
-        \
-        echo && \
-        echo -e '\033[0;36mPulling latest changes from master origin' && \
-        echo -e '============================\033[m' && \
-        git pull && \
-        \
-        echo && \
-        echo -e '\033[0;36mUpdate submodules' && \
-        echo -e '============================\033[m' && \
-        git submodule update && \
-        \
-        echo && \
-        echo -e '\033[0;36mGetting back to private branch' && \
-        echo -e '============================\033[m' && \
-        git checkout $branch && \
-        \
-        echo && \
-        echo -e '\033[0;36mRebasing your branch on master' && \
-        echo -e '============================\033[m' && \
-        git rebase master && \
-        \
-        echo && \
-        echo -e '\033[0;36mReturning to master branch' && \
-        echo -e '============================\033[m' && \
-        git checkout master && \
-        \
-        echo && \
-        echo -e '\033[0;36mMerging your changes with master' && \
-        echo -e '============================\033[m' && \
-        git merge $branch && \
-        echo && \
-        echo -e '\033[0;36mPushing your changes from master to origin' && \
-        echo -e '============================\033[m' && \
-        git push && \
-        \
-        echo && \
-        echo -e '\033[0;36mGetting back to private branch' && \
-        echo -e '============================\033[m' && \
-        git checkout $branch && \
-        echo
+        step 'Switching to master branch'
+        git checkout master || exit
+
+        step 'Pulling latest changes from master origin'
+        git pull || exit
+
+        step 'Update submodules'
+        git submodule update || exit
+
+        step 'Getting back to development branch'
+        git checkout $branch || exit
+
+        step 'Rebasing your branch on master'
+        git rebase master || exit
+
+        step 'Returning to master branch'
+        git checkout master || exit
+
+        step 'Merging your changes with master'
+        git merge $branch || exit
+
+        step 'Pushing your changes from master to origin'
+        git push || exit
+
+        step 'Getting back to private branch' || exit
+        git checkout $branch
+        p
         ;;
 esac

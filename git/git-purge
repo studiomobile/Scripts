@@ -1,0 +1,23 @@
+#!/bin/bash
+
+HL='\033[0;36m'
+NOHL='\033[m'
+
+step() {
+    sub=`echo $1 | sed 's/./=/g'`
+    echo -e $HL"\n"$1"\n"$sub$NOHL
+}
+
+purge() {
+    step "Removing git related files from `pwd`"
+    find . -name ".git*" | xargs rm -rf
+    echo
+}
+
+if [ -z $1 ] ; then
+	purge
+else
+    cd $1 &&
+    purge &&
+    cd - > /dev/null
+fi

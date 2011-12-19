@@ -1,68 +1,62 @@
 #!/bin/bash
 
+HL='\033[0;36m'
+WARN='\033[1;31m'
+NOHL='\033[m'
+
+p() { if [ -z $2 ] ; then echo -e $1 ; else echo -e ${2}${1}${NOHL} ; fi }
+
+step() {
+	sub=`echo $1 | sed -e 's/./=/g'`
+	p "\n$1\n$sub" $HL
+}
+
 get_repository()
 {
-    echo && \
-    echo -e '\033[0;36mClone repository: ' $1 && \
-    echo -e '============================\033[m' && \
-    git clone git@github.com:studiomobile/$1.git && \
-    \
-    cd $1 > /dev/null && \
-    echo && \
-    echo -e '\033[0;36mInit and update submodules' && \
-    echo -e '============================\033[m' && \
-    git submodule init && \
-    git submodule update && \
-    \
-    mybranch && \
-    cd - > /dev/null
+	step "Clone repository: $1"
+	git clone git@github.com:$2/$1.git || exit
+
+	cd $1 > /dev/null || exit
+
+	step 'Init and update submodules'
+	git submodule init && git submodule update || exit
+
+	step 'Switching to development branch'
+	mybranch && cd - > /dev/null
+	p
 }
 
 get_changes() 
 {
-    export branch=`git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/'`
+	branch=`git-current-branch`
 
-    case "$branch" in
-        "master")
-            echo -e '\033[1;31mYou should *NEVER* git-get from \033[1;32mmaster\033[1;31m branch!\033[m'
-            echo -e ''
-            echo -e '\033[1;31mConsult your PM if you have problems with it.\033[m'
-            ;;
-        "")
-            echo -e '\033[1;31mMove to git repository before git-get or use name of repository to clone it.\033[m'
-            ;;
-        *)
-            echo && \
-            echo -e '\033[0;36mSwitching to master branch' && \
-            echo -e '============================\033[m' && \
-            git checkout master && \
-            \
-            echo && \
-            echo -e '\033[0;36mPulling latest changes from master origin' && \
-            echo -e '============================\033[m' && \
-            git pull && \
-            \
-            echo && \
-            echo -e '\033[0;36mUpdate submodules' && \
-            echo -e '============================\033[m' && \
-            git submodule update && \
-            \
-            echo && \
-            echo -e '\033[0;36mGetting back to private branch' && \
-            echo -e '============================\033[m' && \
-            git checkout $branch && \
-            \
-            echo && \
-            echo -e '\033[0;36mRebasing your branch on master' && \
-            echo -e '============================\033[m' && \
-            git rebase master && \
-            echo
-            ;;
-    esac        
+	case "$branch" in
+		"")
+			p 'Move to git repository before git-get or use name of repository to clone it.' $WARN
+			;;
+		*)
+			step "Switching to master branch"
+			git checkout master || exit
+
+			step 'Pulling latest changes from master origin'
+			git pull || exit
+
+			step 'Update submodules'
+			git submodule init && git submodule update || exit
+
+			step 'Getting back to development branch'
+			git checkout $branch || exit
+
+			step 'Rebasing your branch on master'
+			git rebase master || exit
+			p
+			;;
+	esac
 }
 
-if [ "$#" -eq 1 ] ; then
-    get_repository $1
+if [ -z $1 ] ; then
+	get_changes
 else
-    get_changes
+    if [ -z $usr ] ; then usr='studiomobile' ; fi
+	get_repository $1 $usr
 fi

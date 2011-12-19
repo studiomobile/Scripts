@@ -1,0 +1,7 @@
+# GIT branch formatting
+format_git_branch() {
+	git-current-branch | sed -e 's/\(.*\)/(git::\1)/'
+}
+
+# Setup PS to display current branch
+PS1='\u@\h:\W$(format_git_branch)\$ '

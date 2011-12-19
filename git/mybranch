@@ -1,8 +1,15 @@
 #!/bin/bash
 
-export user=`whoami`
+HL='\033[0;36m'
+NOHL='\033[m'
 
-echo && \
-echo -e '\033[0;36mCreate branch: ' $user && \
-echo -e '============================\033[m' && \
-git checkout -b $user
+step() {
+    sub=`echo $1 | sed 's/./=/g'`
+    echo -e $HL"\n"$1"\n"$sub$NOHL
+}
+
+branch=`whoami`
+
+step "Swithing to branch: $branch"
+git checkout -b $branch
+echo
