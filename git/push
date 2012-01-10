@@ -55,8 +55,8 @@ case "$branch" in
         step 'Pushing your changes from master to origin'
         git push || exit
 
-        step 'Getting back to private branch' || exit
-        git checkout $branch
+        step 'Getting back to private branch'
+        git checkout $branch || exit
         p
         ;;
 esac

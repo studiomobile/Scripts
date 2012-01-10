@@ -21,9 +21,7 @@ get_repository()
 	step 'Init and update submodules'
 	git submodule init && git submodule update || exit
 
-	step 'Switching to development branch'
 	mybranch && cd - > /dev/null
-	p
 }
 
 get_changes() 
