@@ -11,5 +11,5 @@ step() {
 branch=`whoami`
 
 step "Swithing to branch: $branch"
-git checkout -b $branch
+git checkout -b $branch || git checkout $branch
 echo
