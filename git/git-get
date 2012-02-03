@@ -7,54 +7,62 @@ NOHL='\033[m'
 p() { if [ -z $2 ] ; then echo -e $1 ; else echo -e ${2}${1}${NOHL} ; fi }
 
 step() {
-	sub=`echo $1 | sed -e 's/./=/g'`
-	p "\n$1\n$sub" $HL
+  sub=`echo $1 | sed -e 's/./=/g'`
+  p "\n$1\n$sub" $HL
 }
 
 get_repository()
 {
-	step "Clone repository: $1"
-	git clone git@github.com:$2/$1.git || exit
+  step "Clone repository: $1"
+  regex='^https?://.+'
+  if [[ $1 =~ $regex ]]; then
+     repo=$1
+     dir=`basename $repo .git`
+  else
+     repo="git@github.com:$2/$1.git"
+     dir=$1
+  fi
+  git clone $repo || exit
 
-	cd $1 > /dev/null || exit
+  cd $dir > /dev/null || exit
 
-	step 'Init and update submodules'
-	git submodule init && git submodule update || exit
+  step 'Init and update submodules'
+  git submodule init && git submodule update || exit
 
-	mybranch && cd - > /dev/null
+  mybranch && cd - > /dev/null
 }
 
 get_changes() 
 {
-	branch=`git-current-branch`
+  branch=`git-current-branch`
 
-	case "$branch" in
-		"")
-			p 'Move to git repository before git-get or use name of repository to clone it.' $WARN
-			;;
-		*)
-			step "Switching to master branch"
-			git checkout master || exit
+  case "$branch" in
+    "")
+      p 'Move to git repository before git-get or use name of repository to clone it.' $WARN
+      ;;
+    *)
+      step "Switching to master branch"
+      git checkout master || exit
 
-			step 'Pulling latest changes from master origin'
-			git pull || exit
+      step 'Pulling latest changes from master origin'
+      git pull || exit
 
-			step 'Update submodules'
-			git submodule init && git submodule update || exit
+      step 'Update submodules'
+      git submodule init && git submodule update || exit
 
-			step 'Getting back to development branch'
-			git checkout $branch || exit
+      step 'Getting back to development branch'
+      git checkout $branch || exit
 
-			step 'Rebasing your branch on master'
-			git rebase master || exit
-			p
-			;;
-	esac
+      step 'Rebasing your branch on master'
+      git rebase master || exit
+      p
+      ;;
+  esac
 }
 
 if [ -z $1 ] ; then
-	get_changes
+  get_changes
 else
-    if [ -z $usr ] ; then usr='studiomobile' ; fi
-	get_repository $1 $usr
+  if [ -z $usr ] ; then usr='studiomobile' ; fi
+  get_repository $1 $usr
 fi
