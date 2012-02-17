@@ -10,6 +10,11 @@ if [ -d /opt/local/bin ]; then
 fi
 
 # Bash completion setup
+# MacPorts version
 if [ -f /opt/local/etc/bash_completion ]; then
     . /opt/local/etc/bash_completion
+fi
+# Homebrew version
+if [ -f `brew --prefix`/etc/bash_completion ]; then
+  . `brew --prefix`/etc/bash_completion
 fi
