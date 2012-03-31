@@ -37,6 +37,11 @@ get_changes()
   branch=`git-current-branch`
 
   case "$branch" in
+    "master")
+      p 'You should *NEVER* git-get from '${HL}'master'${WARN}' branch!' $WARN
+      p ''
+      p 'Consult your PM if you have problems with it.' $WARN
+      ;;    
     "")
       p 'Move to git repository before git-get or use name of repository to clone it.' $WARN
       ;;
