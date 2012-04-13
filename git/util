@@ -1,0 +1,27 @@
+#!/bin/sh
+
+function current_branch {
+	git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/'
+}
+
+function tracking_branch {
+	local origin=${1:-origin}
+	local branch_re="`git-current-branch` merges with remote "
+	local 	tracking_branch=`git remote show $origin | grep "$branch_re" | sed "s/$branch_re\(.*\)/\1/"`
+	echo $tracking_branch
+}
+
+HL='\033[0;36m'
+WARN='\033[1;31m'
+TIP='\033[0;33m'
+NOHL='\033[m'
+
+p() { if [ -z $2 ] ; then echo -e $1 ; else echo -e ${2}${1}${NOHL} ; fi }
+
+step() {
+  sub=`echo $1 | sed -e 's/./=/g'`
+  p "\n$1\n$sub" $HL
+}
+
+branch=`current_branch`
+master=${1:-master}

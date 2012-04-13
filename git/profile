@@ -6,10 +6,13 @@ format_git_branch() {
 # Setup PS to display current branch
 PS1='\u@\h:\W$(format_git_branch)\$ '
 
-alias gs="git status"
+alias gst="git status"
 alias gg="git get"
-alias gst="git stash"
+alias gstash="git stash"
 alias gsp="git stash pop"
 alias gsl="git stash list"
 alias gce="git-conflicts | xargs mate"
 alias gca="git-conflicts | xargs git add"
+alias gch="git checkout"
+alias gcm="git commit"
+alias glog="git log"
