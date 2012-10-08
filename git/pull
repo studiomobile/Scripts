@@ -9,7 +9,7 @@ step "Pulling latest changes from $master origin"
 git pull || exit 1
 
 step "Update submodules"
-git submodule update || exit 1
+git submodule update --init --recursive || exit 1
 
 step "Getting back to development branch"
 git checkout $branch || exit 1
