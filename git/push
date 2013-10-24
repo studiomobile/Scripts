@@ -2,36 +2,6 @@
 
 source util
 
-case "$branch" in
-    $master)
-        echo -e "You should ${WARN}*NEVER* push from $master${NOHL} branch!"
-        echo
-        echo -e "To resolve problem do the following steps:"
-        echo -e "  1. Move all you commits from master to your development branch."
-        echo -e "     Use ${TIP}git-cherry-pick${NOHL} command."
-        echo -e "  2. Remove all you commits from $master."
-        echo -e "     Use ${TIP}git-reset${NOHL} command."
-        echo -e "  3. Select development branch and make push again."
-        echo
-        p "Consult your PM if you have problems with it." $WARN
-        ;;
-    "")
-        p "Move to git repository before push" $WARN
-        ;;
-    *)
-        pull $1 || exit 1
-
-        step 'Returning to $master branch'
-        git checkout $master || exit 1
-
-        step 'Merging your changes with $master'
-        git merge $branch || exit 1
-
-        step 'Pushing your changes from $master to origin'
-        git push || exit 1
-
-        step 'Getting back to private branch'
-        git checkout $branch || exit 1
-        p
-        ;;
-esac
+ensure_no_master
+push_changes
+p
