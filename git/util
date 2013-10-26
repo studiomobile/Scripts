@@ -15,6 +15,22 @@ step() {
 branch=`git rev-parse --abbrev-ref HEAD 2> /dev/null`
 master=${1:-master}
 
+function guess_repo_url {
+  repo=$1
+  starts_https='^https:'
+  starts_git='^git\@'
+  ends_git='\.git$'
+  if [[ $repo =~ $starts_https ]]; then
+    repo=`echo $repo | sed -e 's/^https:\\/\\/[A-Za-z]*@/git@/' -e 's/^https:\\/\\//git@/' -e 's/\(\\.[A-Za-z]*\)\\//\1:/'`
+  elif [[ ! $repo =~ $starts_git ]]; then
+    repo="git@github.com:$repo"
+  fi
+  if [[ ! $repo =~ $ends_git ]]; then
+    repo="$repo.git"
+  fi
+  echo $repo
+}
+
 function ensure_repo {
   if [ -z $branch ] ; then
     p 'To use '${HL}`basename $0`${NOHL}' please move to git repository.' $NOHL
@@ -31,14 +47,8 @@ function ensure_no_master {
 }
 
 function clone_repository {
-  regex='\.git$'
-  if [[ $1 =~ $regex ]]; then
-     repo=$1
-     dir=`basename $1 .git`
-  else
-     repo="git@github.com:$1.git"
-     dir=`basename $1`
-  fi
+  repo=$(guess_repo_url $1)
+  dir=`basename $repo .git`
 
   step "Clone repository: $TIP$repo"
   git clone --depth=1 $repo || exit 1
