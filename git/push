@@ -3,5 +3,15 @@
 source util
 
 ensure_no_master
+
+if preserve_local_changes ; then
+  haveLocalChanges="yes"
+fi
+
 push_changes
+
+if [ "$haveLocalChanges" == "yes" ] ; then
+  restore_local_changes
+fi
+
 p

@@ -65,6 +65,18 @@ function switch_to_branch {
   git checkout -b $1 2> /dev/null || git checkout $1
 }
 
+function preserve_local_changes {
+  changes=`git status | grep 'Changes'`
+  [ -z "$changes" ] && return 1
+  step "Preserving$TIP local changes"
+  git stash
+}
+
+function restore_local_changes {
+  step "Restoring$TIP local changes"
+  git stash pop
+}
+
 function pull_changes {
   step "Switching to $TIP$master"
   git checkout master || exit 1
@@ -91,7 +103,7 @@ function push_changes {
   step "Merging $TIP$branch$HL changes with $TIP$master"
   git merge $branch || exit 1
 
-  step "Pushing $TIP$branch$HL changes from $TIP$master$HL to origin"
+  step "Pushing $TIP$branch$HL changes from $TIP$master$HL to$TIP origin"
   git push || exit 1
 
   step "Getting back to $TIP$branch"
