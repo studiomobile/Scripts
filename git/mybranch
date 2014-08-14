@@ -1,15 +1,6 @@
 #!/bin/bash
 
-HL='\033[0;36m'
-NOHL='\033[m'
+source util
 
-step() {
-    sub=`echo $1 | sed 's/./=/g'`
-    echo -e $HL"\n"$1"\n"$sub$NOHL
-}
-
-branch=`whoami`
-
-step "Swithing to branch: $branch"
-git checkout -b $branch || git checkout $branch
-echo
+ensure_repo
+switch_to_branch `whoami`

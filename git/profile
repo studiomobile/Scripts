@@ -1,6 +1,6 @@
 # GIT branch formatting
 format_git_branch() {
-	git-current-branch | sed -e 's/\(.*\)/(git::\1)/'
+  git rev-parse --abbrev-ref HEAD 2> /dev/null | sed -e 's/\(.*\)/(git::\1)/'
 }
 
 # Setup PS to display current branch
@@ -13,8 +13,6 @@ alias gsp="git stash pop"
 alias gsl="git stash list"
 alias gce="git-conflicts | xargs $EDITOR"
 alias gca="git-conflicts | xargs git add"
-alias gch="git checkout"
+alias gco="git checkout"
 alias gcm="git commit"
-alias ggp="git stash && git get && git stash pop"
-alias gpp="git stash && push && git stash pop"
 alias glog="git log"

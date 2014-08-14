@@ -1,16 +1,5 @@
 #!/bin/sh
 
-function current_branch {
-	git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/'
-}
-
-function tracking_branch {
-	local origin=${1:-origin}
-	local branch_re="`git-current-branch` merges with remote "
-	local 	tracking_branch=`git remote show $origin | grep "$branch_re" | sed "s/$branch_re\(.*\)/\1/"`
-	echo $tracking_branch
-}
-
 HL='\033[0;36m'
 WARN='\033[1;31m'
 TIP='\033[0;33m'
@@ -19,9 +8,104 @@ NOHL='\033[m'
 p() { if [ -z $2 ] ; then echo -e $1 ; else echo -e ${2}${1}${NOHL} ; fi }
 
 step() {
-  sub=`echo $1 | sed -e 's/./=/g'`
-  p "\n$1\n$sub" $HL
+  sub=`echo $1 | sed -e 's/\\\033\[[0-9];[0-9]*m//g' | sed -e 's/./=/g'`
+  p "\n$1\n$HL$sub" $HL
 }
 
-branch=`current_branch`
+branch=`git rev-parse --abbrev-ref HEAD 2> /dev/null`
 master=${1:-master}
+checkout_depth=25
+
+function guess_repo_url {
+  repo=$1
+  starts_https='^https:'
+  starts_git='^git\@'
+  ends_git='\.git$'
+  if [[ $repo =~ $starts_https ]]; then
+    repo=`echo $repo | sed -e 's/^https:\\/\\/[A-Za-z]*@/git@/' -e 's/^https:\\/\\//git@/' -e 's/\(\\.[A-Za-z]*\)\\//\1:/'`
+  elif [[ ! $repo =~ $starts_git ]]; then
+    repo="git@github.com:$repo"
+  fi
+  if [[ ! $repo =~ $ends_git ]]; then
+    repo="$repo.git"
+  fi
+  echo $repo
+}
+
+function ensure_repo {
+  if [ -z $branch ] ; then
+    p 'To use '${HL}`basename $0`${NOHL}' please move to git repository.' $NOHL
+    exit 1
+  fi
+}
+
+function ensure_no_master {
+  ensure_repo
+  if [ $branch = "master" ] ; then
+    p `basename $0`' is not intended to be used from '${HL}'master'${NOHL}' branch,'${NOHL}' please switch to '${HL}'development'${NOHL}' branch.' $NOHL
+    exit 1
+  fi
+}
+
+function clone_repository {
+  repo=$(guess_repo_url $1)
+  dir=`basename $repo .git`
+
+  step "Clone repository: $TIP$repo"
+  git clone --depth=1 $repo || exit 1
+
+  cd $dir > /dev/null || exit 1
+
+  step "Init and update$TIP submodules"
+  git submodule update --init --recursive --depth=1 || exit 1
+}
+
+function switch_to_branch {
+  step "Swithing to $TIP$1$HL"
+  git checkout -b $1 2> /dev/null || git checkout $1
+}
+
+function preserve_local_changes {
+  changes=`git status | grep 'Changes'`
+  [ -z "$changes" ] && return 1
+  step "Preserving$TIP local changes"
+  git stash
+}
+
+function restore_local_changes {
+  step "Restoring$TIP local changes"
+  git stash pop
+}
+
+function pull_changes {
+  step "Switching to $TIP$master"
+  git checkout master || exit 1
+
+  step "Pulling$TIP latest changes$HL from $master origin"
+  git pull --depth=$checkout_depth || exit 1
+
+  step "Update$TIP submodules"
+  git submodule update --init --recursive --depth=$checkout_depth || exit 1
+
+  step "Getting back to $TIP$branch"
+  git checkout $branch || exit 1
+
+  step "Rebasing $TIP$branch$HL on $TIP$master"
+  git rebase master || exit 1
+}
+
+function push_changes {
+  pull_changes || exit 1
+
+  step "Switching to $TIP$master"
+  git checkout $master || exit 1
+
+  step "Merging $TIP$branch$HL changes with $TIP$master"
+  git merge $branch || exit 1
+
+  step "Pushing $TIP$branch$HL changes from $TIP$master$HL to$TIP origin"
+  git push || exit 1
+
+  step "Getting back to $TIP$branch"
+  git checkout $branch || exit 1
+}

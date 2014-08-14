@@ -1,73 +1,26 @@
 #!/bin/bash
 
-HL='\033[0;36m'
-WARN='\033[1;31m'
-NOHL='\033[m'
-
-p() { if [ -z $2 ] ; then echo -e $1 ; else echo -e ${2}${1}${NOHL} ; fi }
-
-step() {
-  sub=`echo $1 | sed -e 's/./=/g'`
-  p "\n$1\n$sub" $HL
-}
-
-get_repository()
-{
-  step "Clone repository: $1"
-  regex='^https?://.+'
-  if [[ $1 =~ $regex ]]; then
-     repo=$1
-     dir=`basename $repo .git`
-  else
-     repo="git@github.com:$2/$1.git"
-     dir=$1
-  fi
-  git clone $repo || exit
-
-  cd $dir > /dev/null || exit
-
-  step 'Init and update submodules'
-  git submodule update --init --recursive || exit
-
-  mybranch && cd - > /dev/null
-}
-
-get_changes() 
-{
-  branch=`git-current-branch`
-
-  case "$branch" in
-    "master")
-      p 'You should *NEVER* git-get from '${HL}'master'${WARN}' branch!' $WARN
-      p ''
-      p 'Consult your PM if you have problems with it.' $WARN
-      ;;    
-    "")
-      p 'Move to git repository before git-get or use name of repository to clone it.' $WARN
-      ;;
-    *)
-      step "Switching to master branch"
-      git checkout master || exit
-
-      step 'Pulling latest changes from master origin'
-      git pull || exit
-
-      step 'Update submodules'
-      git submodule update --init --recursive || exit
-
-      step 'Getting back to development branch'
-      git checkout $branch || exit
-
-      step 'Rebasing your branch on master'
-      git rebase master || exit
-      p
-      ;;
-  esac
-}
+source util
 
 if [ -z $1 ] ; then
-  get_changes
+
+  ensure_no_master
+
+  if preserve_local_changes ; then
+    haveLocalChanges="yes"
+  fi
+
+  pull_changes
+
+  if [ "$haveLocalChanges" == "yes" ] ; then
+    restore_local_changes
+  fi
+
+  p
+
 else
-  if [ -z $usr ] ; then usr='studiomobile' ; fi
-  get_repository $1 $usr
+
+  clone_repository $1
+  mybranch && cd - > /dev/null
+
 fi
