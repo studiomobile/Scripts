@@ -52,12 +52,12 @@ function clone_repository {
   dir=`basename $repo .git`
 
   step "Clone repository: $TIP$repo"
-  git clone --depth=1 $repo || exit 1
+  git clone --depth=$checkout_depth $repo || exit 1
 
   cd $dir > /dev/null || exit 1
 
   step "Init and update$TIP submodules"
-  git submodule update --init --recursive --depth=1 || exit 1
+  git submodule update --init --recursive --depth=$checkout_depth || exit 1
 }
 
 function switch_to_branch {
@@ -82,7 +82,7 @@ function pull_changes {
   git checkout master || exit 1
 
   step "Pulling$TIP latest changes$HL from $master origin"
-  git pull --depth=$checkout_depth || exit 1
+  git pull || exit 1
 
   step "Update$TIP submodules"
   git submodule update --init --recursive --depth=$checkout_depth || exit 1
