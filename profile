@@ -1,4 +1,4 @@
-DIR="$( cd -P "$( dirname "$0" )" && pwd )"
+DIR="$( cd -P "$( dirname "$BASH_SOURCE" )" && pwd )"
 
 export PATH=$PATH:$DIR/git
 
